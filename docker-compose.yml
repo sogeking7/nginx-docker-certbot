@@ -1,0 +1,68 @@
+services:
+  client:    
+    build:
+      context: ./aidentify-front
+      dockerfile: Dockerfile
+    volumes:
+      - ./your_frontend_dir:/app
+      - /app/.next
+      - /app/node_modules
+    env_file:
+      - ./your_frontend_dir/.env
+    restart: always
+    # ports:
+    #  - "${FRONTEND_PORT_HOST}:${FRONTEND_PORT_CONTAINER}"
+ 
+  api:
+    build: 
+      context: ./aidentify
+      dockerfile: Dockerfile
+    env_file:
+      - ./your_backend_dir/.env
+    volumes:
+      - ./your_backend_dir:/app
+    depends_on:
+      - db
+    # ports:
+    #  - "${BACKEND_PORT_HOST}:${BACKEND_PORT_CONTAINER}"
+  
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - client
+      - api
+    restart: unless-stopped
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  
+  certbot: 
+    image: certbot/certbot
+    restart: unless-stopped
+    depends_on: 
+      - nginx
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  db:
+    image: postgres:13
+    restart: always
+    env_file:
+      - ./your_backend_dir/.env
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
