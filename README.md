@@ -5,13 +5,13 @@ Configuration files for deployment fullstack applications
 First of all you need to move here your `backend` and `frontend` applications folders with `Dockerfile` inside in
 
 ### First Step
-```
+```bash
 docker compose up -d --build
 # Here we actually running our nginx server without ssl sertification
 ```
 
 ### Second Step
-```
+```bash
 chmod +x init-letsencrypt.sh
 # Giving acces to run 
 
