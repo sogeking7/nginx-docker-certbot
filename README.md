@@ -12,7 +12,7 @@ docker compose up -d --build
 
 ### Second Step
 ```
-cmod +x init-letsencrypt.sh
+chmod +x init-letsencrypt.sh
 # Giving acces to run 
 
 ./init-letsencrypt.sh
