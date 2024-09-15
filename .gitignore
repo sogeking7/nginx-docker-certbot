@@ -1,0 +1,6 @@
+*
+!/data/nginx/app.conf
+!docker-compose.yml
+!.init-letsencrypt.sh
+!README.md
+!.gitignore
